@@ -1,6 +1,22 @@
+import * as Yup from "yup";
+
 import User from "../models/Users";
+
 class UserController {
   async store(req, res) {
+    const schema = Yup.object().shape({
+      name: Yup.string().required(),
+      email: Yup.string()
+        .email()
+        .required(),
+      password: Yup.string()
+        .required()
+        .min(6)
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: "Validations fails" });
+    }
     const userExist = await User.findOne({
       where: {
         email: req.body.email
@@ -15,8 +31,42 @@ class UserController {
   }
 
   async update(req, res) {
-    console.log(req.userId);
-    return res.json({ ok: "ok" });
+    // Validação
+
+    const schema = Yup.object().shape({
+      name: Yup.string(),
+      email: Yup.string().email(),
+      oldPassword: Yup.string().min(6),
+      password: Yup.string()
+        .min(6)
+        .when("oldPassword", (oldPassword, field) => {
+          return oldPassword ? field.required() : field;
+        }),
+      confirmPassword: Yup.string().when("password", (password, field) => {
+        return password ? field.required().oneOf([Yup.ref("password")]) : field;
+      })
+    });
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: "Validations fails" });
+    }
+
+    const { email, oldPassword } = req.body;
+    const user = await User.findByPk(req.userId);
+    // Usuário deseja mudar email
+    if (user.email != email) {
+      // Se novo email já existe na base de dados
+      if (await !User.findOne({ where: { email } })) {
+        return res.status(400).json({ error: "User email already exists!! " });
+      }
+    }
+
+    // Só irá verificar se a senha bate se o usuáro informar um novo password
+    if (oldPassword && !(await user.checkPassword(oldPassword))) {
+      return res.status(401).json({ error: "Password does not match!" });
+    }
+
+    const { id, name, provider } = await user.update(req.body);
+    return res.json({ id, name, email, provider });
   }
 }
 
