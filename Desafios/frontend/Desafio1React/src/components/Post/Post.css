@@ -1,0 +1,43 @@
+.post {
+  background: #fff;
+  border-radius: 5px;
+  color: black;
+  margin: 5px;
+  display: inline-block;
+  width: 100%;
+  padding-bottom: 20px;
+}
+
+.profile-user-post {
+  display: flex;
+  padding: 20px;
+}
+.profile-user-post .name-user {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: bold;
+  margin-left: 20px;
+}
+
+.separator {
+  height: 1px;
+  background: #eeeeee;
+  margin: 10px 20px 10px 20px;
+}
+.profile-user-post .date-post {
+  font-family: Arial, Helvetica, sans-serif;
+  margin-left: 20px;
+  font-size: small;
+  margin-top: 5px;
+  color: #bdbdbd;
+}
+
+.content-post {
+  margin-left: 20px;
+  margin-bottom: 20px;
+}
+
+.profile-user-post img {
+  border-radius: 50%;
+  height: 40px;
+  width: 40px;
+}
