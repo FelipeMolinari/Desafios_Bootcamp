@@ -31,7 +31,6 @@ export default class Repository extends Component {
       })
     ]);
 
-    console.log("alalla", repository, issues);
     this.setState({
       repository: repository.data,
       issues: issues.data,
