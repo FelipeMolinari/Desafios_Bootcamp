@@ -6,25 +6,23 @@ import { connect } from "react-redux";
 
 import { MdAddShoppingCart } from "react-icons/md";
 import { ProductList } from "./styles";
+import * as actionsCart from "../../store/modules/cart/actions";
 
 class Home extends Component {
   state = {
     products: []
   };
 
-  onAddProductToCart = product => {
+  onAddProductToCart = id => {
     const { dispatch } = this.props;
-    dispatch({
-      type: "ADD_TO_CART",
-      product
-    });
+    dispatch(actionsCart.addToCartRequest(id));
   };
 
   async componentDidMount() {
     const response = await api.get("products");
     const data = response.data.map(product => ({
       ...product,
-      formatedPrice: formatPrice(product.price)
+      formattedPrice: formatPrice(product.price)
     }));
     this.setState({
       products: data
@@ -32,6 +30,7 @@ class Home extends Component {
   }
 
   render() {
+    const { amount } = this.props;
     const { products } = this.state;
     return (
       <ProductList>
@@ -39,15 +38,15 @@ class Home extends Component {
           <li key={product.id}>
             <img src={product.image} alt={product.title} />
             <strong>{product.title}</strong>
-            <span>{product.formatedPrice}</span>
+            <span>{product.formattedPrice}</span>
 
             <button
               type="button"
-              onClick={() => this.onAddProductToCart(product)}
+              onClick={() => this.onAddProductToCart(product.id)}
             >
               <div>
                 <MdAddShoppingCart size={16} color="#fff" />
-                <span>3</span>
+                <span>{amount[product.id] || 0}</span>
               </div>
               <span>Adicionar ao carrinho</span>
             </button>
@@ -57,4 +56,11 @@ class Home extends Component {
     );
   }
 }
-export default connect()(Home);
+
+const mapStateToProps = state => ({
+  amount: state.cart.reduce((amount, product) => {
+    amount[product.id] = product.amount;
+    return amount;
+  }, {})
+});
+export default connect(mapStateToProps)(Home);
